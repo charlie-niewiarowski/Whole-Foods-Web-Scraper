@@ -7,15 +7,17 @@ import re
 
 ######################################## Helpers #########################################
 
-def extract_upc_from_images(image_list):
-    for image_obj in image_list:
-        for key in ["image", "thumbnail", "image2x"]:
-            url = image_obj.get(key)
-            if url:
-                match = re.search(r"[_-](\d{13})-", url)
-                if match:
-                    return match.group(1)
-    return "No UPC Found"
+def extract_upc_from_data(data):
+    images = data.get("images", [])
+    for image_entry in images:
+        for key in ["thumbnail", "image", "image2x"]:
+            url = image_entry.get(key, "")
+            match = re.search(r"(\d{14})", url)
+            if match:
+                upc14 = match.group(1)
+                upc12 = upc14[1:]  # Strip the leading 0 for standard UPC-A
+                return upc12
+    return "None"
 
 ######################################## Configure ######################################## 
 
@@ -62,13 +64,12 @@ with open(f"whole_foods_products_{STORE_ID}.csv", "w", newline='', encoding="utf
         results = data.get("results", [])
 
         for item in results:
-            upc = "No UPC available"
+            upc = "None"
             if UPC:
                 slug = item.get("slug")
                 product = requests.get(f"https://www.wholefoodsmarket.com/api/product/{slug}?store={STORE_ID}").json()
                 if product:
-                    image_list = product.get("images", [])
-                    upc = extract_upc_from_images(image_list)
+                    upc = extract_upc_from_data(product)
                     print("UPC: ", upc)
             
             writer.writerow([

@@ -40,7 +40,7 @@ print("Total items reported:", total)
 time.sleep(2)
 with open(f"whole_foods_products_{STORE_ID}.csv", "w", newline='', encoding="utf-8") as f:
     writer = csv.writer(f)
-    writer.writerow(["id", "name", "brand", "slug", "price", "image", "uom", "isLocal", "store"])
+    writer.writerow(["id", "name", "brand", "slug", "price", "image", "uom", "isLocal"])
 
     for offset in range(0, total, LIMIT):
         print(f"Fetching items {offset}-{offset + LIMIT}...")
@@ -66,5 +66,4 @@ with open(f"whole_foods_products_{STORE_ID}.csv", "w", newline='', encoding="utf
                 item.get("imageThumbnail"),
                 item.get("uom", ""),
                 item.get("isLocal"),
-                item.get("store")
             ])
